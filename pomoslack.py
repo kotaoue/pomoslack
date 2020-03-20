@@ -66,7 +66,7 @@ def get_token() -> (str):
 def list():
     api_url = 'https://slack.com/api/reminders.list'
     headers = {
-        'content-type': 'application/json',
+        'content-type': 'application/json; charset=UTF-8',
         'Authorization': get_token()
     }
 
@@ -78,7 +78,7 @@ def list():
 def set(sec: int, text: str):
     api_url = 'https://slack.com/api/reminders.add'
     headers = {
-        'content-type': 'application/json',
+        'content-type': 'application/json; charset=UTF-8',
         'Authorization': get_token()
     }
 
