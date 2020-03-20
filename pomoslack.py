@@ -110,7 +110,7 @@ def main():
 
     sec = args.min * 60
     if args.sec > 0:
-        sec = args.sec    
+        sec = args.sec
     text = args.text
     print(sec)
     print(text)
