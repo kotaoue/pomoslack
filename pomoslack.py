@@ -70,9 +70,14 @@ def list():
         'Authorization': get_token()
     }
 
-    res = requests.post(api_url, headers=headers)
-    pprint.pprint(res.json())
-    sys.exit(0)
+    res = requests.post(api_url, headers=headers).json()
+    if 'ok' in res and res['ok']:
+        for value in res['reminders']:
+            pprint.pprint(value)
+        sys.exit(0)
+    else:
+        print('error occurred')
+        sys.exit(1)
 
 
 def set(sec: int, text: str):
