@@ -23,6 +23,8 @@ def get_args() -> (argparse.Namespace):
     parser.add_argument(
         '-l', '--list', help='Show remider list.', action='store_true')
     parser.add_argument(
+        '-s', '--sec', help='Sec to set a reminder.', type=int, default=0)
+    parser.add_argument(
         '-m', '--min', help='Min to set a reminder.', type=int, default=25)
     parser.add_argument(
         '-t', '--text', help='Reminder message.', type=str, default=':tomato:')
@@ -73,7 +75,7 @@ def list():
     sys.exit(0)
 
 
-def set(min: int, text: str):
+def set(sec: int, text: str):
     api_url = 'https://slack.com/api/reminders.add'
     headers = {
         'content-type': 'application/json',
@@ -82,7 +84,7 @@ def set(min: int, text: str):
 
     payload = {}
     payload['text'] = text
-    payload['time'] = int(time.time()) + (min * 10)
+    payload['time'] = int(time.time()) + sec
 
     res = requests.post(api_url, data=json.dumps(payload), headers=headers)
     pprint.pprint(res.json())
@@ -101,11 +103,13 @@ def main():
     if args.list:
         list()
 
-    min = args.min
+    sec = args.min * 60
+    if args.sec > 0:
+        sec = args.sec    
     text = args.text
-    print(min)
+    print(sec)
     print(text)
-    set(min, text)
+    set(sec, text)
 
     exit(0)
 
