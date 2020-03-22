@@ -4,6 +4,7 @@
 
 import argparse
 import configparser
+from datetime import datetime
 import json
 import os
 import pprint
@@ -72,12 +73,66 @@ def list():
 
     res = requests.post(api_url, headers=headers).json()
     if 'ok' in res and res['ok']:
-        for value in res['reminders']:
-            pprint.pprint(value)
+        if 'reminders' in res and len(res['reminders']) > 0:
+            id_len = len('id')
+            time_len = len('2000-01-01 00:00:00')
+            complete_len = len('complete')
+            text_len = len('text')
+            margin = 1
+            peifix_len = len('|')
+
+            for value in res['reminders']:
+                if len(value['id']) > id_len:
+                    id_len = len(value['id'])
+                if len(value['text']) > text_len:
+                    text_len = len(value['text'])
+
+            line = '+'
+            line += ('-' * (id_len + (margin * 2) + peifix_len)) + '+'
+            line += ('-' * (time_len + (margin * 2) + peifix_len)) + '+'
+            line += ('-' * (complete_len + (margin * 2) + peifix_len)) + '+'
+            line += ('-' * (text_len + (margin * 2) + peifix_len)) + '+'
+            print(line)
+            title = ''
+            title += _format_list_str('id', id_len, margin)
+            title += _format_list_str('time', time_len, margin)
+            title += _format_list_str('complete', complete_len, margin)
+            title += _format_list_str('text', text_len, margin)
+            title += '|'
+            print(title)
+            print(line)
+            for value in res['reminders']:
+                if not value['recurring']:
+                    id_str = _format_list_str(value['id'], id_len, margin)
+                    print(id_str, end='')
+
+                    dt = datetime.fromtimestamp(value['time'])
+                    dtstr = dt.strftime('%Y-%m-%d %H:%M:%S')
+                    time_str = _format_list_str(dtstr, time_len, margin)
+                    print(time_str, end='')
+
+                    complete = value['complete_ts'] == 0
+                    complete_value = 'no'
+                    if complete:
+                        complete_value = 'yes'
+                    complete_str = _format_list_str(
+                        complete_value, complete_len, margin)
+                    print(complete_str, end='')
+
+                    text_str = _format_list_str(
+                        value['text'], text_len, margin)
+                    print(text_str, end='')
+
+                    print('|')
+            print(line)
         sys.exit(0)
     else:
         print('error occurred')
         sys.exit(1)
+
+
+def _format_list_str(text: str, max_len: int, margin: int, prefix: str = '|') -> (str):
+    return (prefix + (' ' * (len(prefix) + margin)) + text + (' ' * (max_len - len(text) + margin)))
 
 
 def set(sec: int, text: str):
