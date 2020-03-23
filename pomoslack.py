@@ -74,6 +74,8 @@ def list():
     res = requests.post(api_url, headers=headers).json()
     if 'ok' in res and res['ok']:
         if 'reminders' in res and len(res['reminders']) > 0:
+            res['reminders'].sort(key=lambda x: x.get('time', 0))
+
             id_len = len('id')
             time_len = len('2000-01-01 00:00:00')
             complete_len = len('complete')
