@@ -113,9 +113,8 @@ def list():
                     time_str = _format_list_str(dtstr, time_len, margin)
                     print(time_str, end='')
 
-                    complete = value['complete_ts'] == 0
                     complete_value = 'no'
-                    if complete:
+                    if value['complete_ts'] > 0:
                         complete_value = 'yes'
                     complete_str = _format_list_str(
                         complete_value, complete_len, margin)
