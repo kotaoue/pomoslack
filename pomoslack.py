@@ -32,8 +32,13 @@ def get_args() -> (argparse.Namespace):
     return parser.parse_args()
 
 
+def get_ini_path() -> (str):
+    base_dir = os.path.dirname(os.path.abspath(__file__)) 
+    return os.path.join(base_dir, CONFIG_FILE_NAME)
+
+
 def exists_ini() -> (bool):
-    return os.path.exists(CONFIG_FILE_NAME)
+    return os.path.exists(get_ini_path())
 
 
 def init():
@@ -48,8 +53,9 @@ def init():
         config_ini.add_section(section)
         config_ini.set(section, 'token', token)
 
-        with open(CONFIG_FILE_NAME, 'w') as file:
+        with open(get_ini_path(), 'w') as file:
             config_ini.write(file)
+        sys.exit(0)
     else:
         print("It's invalid token.")
         sys.exit(1)
@@ -58,7 +64,7 @@ def init():
 def get_token() -> (str):
     if exists_ini():
         config_ini = configparser.ConfigParser()
-        config_ini.read(CONFIG_FILE_NAME)
+        config_ini.read(get_ini_path())
         return 'Bearer ' + config_ini.get(CONFIG_FILE_SECTION, 'token')
     else:
         return ''
