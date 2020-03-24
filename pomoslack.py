@@ -24,6 +24,8 @@ def get_args() -> (argparse.Namespace):
     parser.add_argument(
         '-l', '--list', help='Show remider list.', action='store_true')
     parser.add_argument(
+        '-a', '--aggregate', help='Aggregate complete remind.', action='store_true')
+    parser.add_argument(
         '-s', '--sec', help='Sec to set a reminder.', type=int, default=0)
     parser.add_argument(
         '-m', '--min', help='Min to set a reminder.', type=int, default=25)
@@ -143,6 +145,69 @@ def list():
     sys.exit(0)
 
 
+def aggregate():
+    res = do_list_api()
+    if 'reminders' in res and len(res['reminders']) > 0:
+        res['reminders'].sort(key=lambda x: x.get('time', 0))
+
+        result = {}
+        for value in res['reminders']:
+            if not value['recurring']:
+                dt = datetime.fromtimestamp(value['time'])
+                dtstr = dt.strftime('%Y-%m-%d')
+
+                if dtstr not in result:
+                    result[dtstr] = {}
+
+                text = value['text']
+                if text not in result[dtstr]:
+                    result[dtstr][text] = 0
+
+                result[dtstr][text] += 1
+
+        time_len = len(max(result.keys()))
+        text_len = len('text')
+        count_len = len('count')
+        margin = 1
+        peifix_len = len('|')
+
+        for value in result.values():
+            key_len = len(max(value.keys()))
+            if text_len < key_len:
+                text_len = key_len
+
+            value_len = len(str(max(value.values())))
+            if count_len < value_len:
+                count_len = value_len
+
+        line = '+'
+        line += ('-' * (time_len + (margin * 2) + peifix_len)) + '+'
+        line += ('-' * (text_len + (margin * 2) + peifix_len)) + '+'
+        line += ('-' * (count_len + (margin * 2) + peifix_len)) + '+'
+        print(line)
+        title = ''
+        title += _format_list_str('time', time_len, margin)
+        title += _format_list_str('text', text_len, margin)
+        title += _format_list_str('count', count_len, margin)
+        title += '|'
+        print(title)
+        print(line)
+        for time_key, item_dict in result.items():
+            for text_key, count_value in item_dict.items():
+                time_str = _format_list_str(time_key, time_len, margin)
+                print(time_str, end='')
+
+                text_str = _format_list_str(text_key, text_len, margin)
+                print(text_str, end='')
+
+                count_str = _format_list_str(
+                    str(count_value), count_len, margin)
+                print(count_str, end='')
+                print('|')
+    print(line)
+    sys.exit(0)
+
+
 def _format_list_str(text: str, max_len: int, margin: int, prefix: str = '|') -> (str):
     return (prefix + (' ' * (len(prefix) + margin)) + text + (' ' * (max_len - len(text) + margin)))
 
@@ -174,6 +239,9 @@ def main():
 
     if args.list:
         list()
+
+    if args.aggregate:
+        aggregate()
 
     sec = args.min * 60
     if args.sec > 0:
