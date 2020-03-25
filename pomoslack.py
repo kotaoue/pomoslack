@@ -223,9 +223,19 @@ def set(sec: int, text: str):
     payload['text'] = text
     payload['time'] = int(time.time()) + sec
 
-    res = requests.post(api_url, data=json.dumps(payload), headers=headers)
-    pprint.pprint(res.json())
-    sys.exit(0)
+    res = requests.post(
+        api_url,
+        data=json.dumps(payload),
+        headers=headers).json()
+    if 'ok' in res and res['ok']:
+        if 'reminder' in res and len(res['reminder']) > 0:
+            dt = datetime.fromtimestamp(res['reminder']['time'])
+            dtstr = dt.strftime('%Y-%m-%d %H:%M:%S')
+            print('remind at ' + dtstr)
+        sys.exit(0)
+    else:
+        print('error occurred')
+        sys.exit(1)
 
 
 def main():
@@ -247,8 +257,6 @@ def main():
     if args.sec > 0:
         sec = args.sec
     text = args.text
-    print(sec)
-    print(text)
     set(sec, text)
 
     exit(0)
