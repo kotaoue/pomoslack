@@ -1,4 +1,5 @@
 # pomoslack
+![GitHub](https://img.shields.io/github/license/kotaoue/pomoslack)
 ## Overview
 ポモドーロ・テクニックお助け用スクリプト  
 コマンドラインからslackにリマインダを登録したり、  
