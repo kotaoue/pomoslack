@@ -35,3 +35,6 @@ $ pip3 install -r requirements.txt
   |  2020-04-15 |  :tomato: |  13    |
   +-------------+-----------+--------+
   ```
+
+## License
+MITっす
