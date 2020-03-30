@@ -6,8 +6,17 @@
 1日の総ポモドーロ数を集計したりする。
 
 ## Dependency
+### Python
 * Python3
 * requests
+### Slack
+* [reminders:read scope](https://api.slack.com/scopes/reminders:read)
+* [reminders:write scope](https://api.slack.com/scopes/reminders:write)
+#### トークン 習得方法
+1. https://api.slack.com/ -> click 'Start Building'
+2. Create App
+3. Basic Information -> Add features and functionality -> Premissions
+4. Scopes -> User Token Scopes -> Add an OAuth Scope
 
 ## Setup
 ```
@@ -38,4 +47,4 @@ $ pip3 install -r requirements.txt
   ```
 
 ## License
-MITっす
+MITっす。
