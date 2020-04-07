@@ -1,3 +1,7 @@
+# Local Setting
+.DS_Store
+*.swp
+
 # Project Setting
 config.ini
 
