@@ -11,6 +11,7 @@ import pprint
 import requests
 import sys
 import time
+from modules.clitable import clitable
 
 CONFIG_FILE_NAME: str = 'config.ini'
 CONFIG_FILE_SECTION: str = 'slack'
@@ -87,61 +88,27 @@ def do_list_api() -> (dict):
         return {}
 
 
-def list():
+def remind_list():
     res = do_list_api()
+
     if 'reminders' in res and len(res['reminders']) > 0:
         res['reminders'].sort(key=lambda x: x.get('time', 0))
 
-        id_len = len('id')
-        time_len = len('2000-01-01 00:00:00')
-        complete_len = len('complete')
-        text_len = len('text')
-        margin = 1
-        peifix_len = len('|')
-
+        result = []
         for value in res['reminders']:
-            if len(value['id']) > id_len:
-                id_len = len(value['id'])
-            if len(value['text']) > text_len:
-                text_len = len(value['text'])
+            remind = {}
+            remind['id'] = value['id']
 
-        line = '+'
-        line += ('-' * (id_len + (margin * 2) + peifix_len)) + '+'
-        line += ('-' * (time_len + (margin * 2) + peifix_len)) + '+'
-        line += ('-' * (complete_len + (margin * 2) + peifix_len)) + '+'
-        line += ('-' * (text_len + (margin * 2) + peifix_len)) + '+'
-        print(line)
-        title = ''
-        title += _format_list_str('id', id_len, margin)
-        title += _format_list_str('time', time_len, margin)
-        title += _format_list_str('complete', complete_len, margin)
-        title += _format_list_str('text', text_len, margin)
-        title += '|'
-        print(title)
-        print(line)
-        for value in res['reminders']:
-            if not value['recurring']:
-                id_str = _format_list_str(value['id'], id_len, margin)
-                print(id_str, end='')
+            dt = datetime.fromtimestamp(value['time'])
+            remind['time'] = dt.strftime('%Y-%m-%d %H:%M:%S')
+            complete_value = 'no'
+            if value['complete_ts'] > 0:
+                complete_value = 'yes'
+            remind['complete'] = complete_value
+            remind['text'] = value['text']
+            result.append(remind)
 
-                dt = datetime.fromtimestamp(value['time'])
-                dtstr = dt.strftime('%Y-%m-%d %H:%M:%S')
-                time_str = _format_list_str(dtstr, time_len, margin)
-                print(time_str, end='')
-
-                complete_value = 'no'
-                if value['complete_ts'] > 0:
-                    complete_value = 'yes'
-                complete_str = _format_list_str(
-                    complete_value, complete_len, margin)
-                print(complete_str, end='')
-
-                text_str = _format_list_str(
-                    value['text'], text_len, margin)
-                print(text_str, end='')
-
-                print('|')
-    print(line)
+        clitable.print_table(result)
     sys.exit(0)
 
 
@@ -150,69 +117,31 @@ def aggregate():
     if 'reminders' in res and len(res['reminders']) > 0:
         res['reminders'].sort(key=lambda x: x.get('time', 0))
 
-        result = {}
+        aggregate_result = {}
         for value in res['reminders']:
             if not value['recurring']:
                 dt = datetime.fromtimestamp(value['time'])
                 dtstr = dt.strftime('%Y-%m-%d')
 
-                if dtstr not in result:
-                    result[dtstr] = {}
+                if dtstr not in aggregate_result:
+                    aggregate_result[dtstr] = {}
 
                 text = value['text']
-                if text not in result[dtstr]:
-                    result[dtstr][text] = 0
+                if text not in aggregate_result[dtstr]:
+                    aggregate_result[dtstr][text] = 0
 
-                result[dtstr][text] += 1
+                aggregate_result[dtstr][text] += 1
 
-        time_len = len(max(result.keys()))
-        text_len = len('text')
-        count_len = len('count')
-        margin = 1
-        peifix_len = len('|')
+        result = []
+        for date, details in aggregate_result.items():
+            for text, count in details.items():
+                result.append({'date': date, 'text': text, 'count': count})
 
-        for value in result.values():
-            key_len = len(max(value.keys()))
-            if text_len < key_len:
-                text_len = key_len
-
-            value_len = len(str(max(value.values())))
-            if count_len < value_len:
-                count_len = value_len
-
-        line = '+'
-        line += ('-' * (time_len + (margin * 2) + peifix_len)) + '+'
-        line += ('-' * (text_len + (margin * 2) + peifix_len)) + '+'
-        line += ('-' * (count_len + (margin * 2) + peifix_len)) + '+'
-        print(line)
-        title = ''
-        title += _format_list_str('time', time_len, margin)
-        title += _format_list_str('text', text_len, margin)
-        title += _format_list_str('count', count_len, margin)
-        title += '|'
-        print(title)
-        print(line)
-        for time_key, item_dict in result.items():
-            for text_key, count_value in item_dict.items():
-                time_str = _format_list_str(time_key, time_len, margin)
-                print(time_str, end='')
-
-                text_str = _format_list_str(text_key, text_len, margin)
-                print(text_str, end='')
-
-                count_str = _format_list_str(
-                    str(count_value), count_len, margin)
-                print(count_str, end='')
-                print('|')
-    print(line)
+        clitable.print_table(result)
     sys.exit(0)
 
 
-def _format_list_str(text: str, max_len: int, margin: int, prefix: str = '|') -> (str):
-    return (prefix + (' ' * (len(prefix) + margin)) + text + (' ' * (max_len - len(text) + margin)))
-
-
-def set(sec: int, text: str):
+def remind_set(sec: int, text: str):
     api_url = 'https://slack.com/api/reminders.add'
     headers = {
         'content-type': 'application/json; charset=UTF-8',
@@ -248,7 +177,7 @@ def main():
         init()
 
     if args.list:
-        list()
+        remind_list()
 
     if args.aggregate:
         aggregate()
@@ -257,7 +186,7 @@ def main():
     if args.sec > 0:
         sec = args.sec
     text = args.text
-    set(sec, text)
+    remind_set(sec, text)
 
     exit(0)
 
