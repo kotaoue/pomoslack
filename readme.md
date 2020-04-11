@@ -48,3 +48,6 @@ $ pip3 install -r requirements.txt
 
 ## License
 MITっす。
+
+## References
+[kotaoue/clitable](https://github.com/kotaoue/clitable)
