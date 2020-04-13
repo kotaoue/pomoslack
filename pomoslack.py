@@ -31,7 +31,7 @@ def get_args() -> (argparse.Namespace):
     parser.add_argument(
         '-m', '--min', help='Min to set a reminder.', type=int, default=25)
     parser.add_argument(
-        '-t', '--text', help='Reminder message.', type=str, default=':tomato:')
+        '-t', '--text', help='Reminder message.', type=str, default=get_message())
     return parser.parse_args()
 
 
@@ -49,12 +49,18 @@ def init():
     print("We need two permissions for 'reminders:read' and 'reminders:write'.")
     print('cf. https://api.slack.com/apps -> OAuth & Permissions')
     token = input('>> ')
-
+    print('Please input reminder message.')
+    print('When not input message becames message is ":tomato:".')
+    message = input('>> ')
     if token.find('xoxp') == 0:
         config_ini = configparser.ConfigParser()
         section = CONFIG_FILE_SECTION
         config_ini.add_section(section)
         config_ini.set(section, 'token', token)
+        config_ini.set(
+            section, 'message',
+            (lambda message: message if message else ':tomato:')(message)
+        )
 
         with open(get_ini_path(), 'w') as file:
             config_ini.write(file)
@@ -71,6 +77,15 @@ def get_token() -> (str):
         return 'Bearer ' + config_ini.get(CONFIG_FILE_SECTION, 'token')
     else:
         return ''
+
+
+def get_message() -> (str):
+    if exists_ini():
+        config_ini = configparser.ConfigParser()
+        config_ini.read(get_ini_path())
+        return config_ini.get(CONFIG_FILE_SECTION, 'message')
+    else:
+        return ':tomato:'
 
 
 def do_list_api() -> (dict):
