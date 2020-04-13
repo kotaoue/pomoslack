@@ -4,13 +4,15 @@
 
 import argparse
 import configparser
-from datetime import datetime
 import json
 import os
 import pprint
-import requests
 import sys
 import time
+from datetime import datetime
+
+import requests
+
 from modules.clitable import clitable
 
 CONFIG_FILE_NAME: str = 'config.ini'
