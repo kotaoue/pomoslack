@@ -81,7 +81,7 @@ def do_list_api() -> (dict):
     }
 
     res = requests.post(api_url, headers=headers).json()
-    if 'ok' in res and res['ok']:
+    if res.get('ok', False):
         return res
     else:
         print('error occurred')
@@ -157,7 +157,7 @@ def remind_set(sec: int, text: str):
         data=json.dumps(payload),
         headers=headers).json()
     if 'ok' in res and res['ok']:
-        if 'reminder' in res and len(res['reminder']) > 0:
+        if len(res.get('reminder')) > 0:
             dt = datetime.fromtimestamp(res['reminder']['time'])
             dtstr = dt.strftime('%Y-%m-%d %H:%M:%S')
             print('remind at ' + dtstr)
