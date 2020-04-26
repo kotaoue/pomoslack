@@ -186,7 +186,6 @@ def remind_set(sec: int, text: str):
 
 def main():
     if not exists_ini():
-        print('please initialize.')
         init()
 
     args = get_args()
