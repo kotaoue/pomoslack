@@ -199,12 +199,9 @@ def main():
     if args.aggregate:
         aggregate()
 
-    sec = args.min * 60
-    if args.sec > 0:
-        sec = args.sec
+    sec = args.min * 60 if args.sec == 0 else args.sec
     text = args.text
     remind_set(sec, text)
-
     exit(0)
 
 
