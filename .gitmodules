@@ -1,0 +1,3 @@
+[submodule "modules/clitable"]
+	path = modules/clitable
+	url = https://github.com/kotaoue/clitable.git
