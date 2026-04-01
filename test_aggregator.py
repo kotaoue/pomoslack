@@ -1,5 +1,6 @@
 # coding=utf8
 import unittest
+from datetime import datetime
 from unittest.mock import patch
 
 import aggregator
@@ -119,8 +120,7 @@ class TestAggregate(unittest.TestCase):
             with patch('aggregator.clitable.print_table') as mock_print:
                 with self.assertRaises(SystemExit):
                     aggregator.aggregate()
-                result = mock_print.call_args[0][0]
-                self.assertEqual(result, [])
+                mock_print.assert_not_called()
 
     def test_aggregates_reminders_across_dates(self):
         reminders = [
@@ -131,11 +131,9 @@ class TestAggregate(unittest.TestCase):
             with patch('aggregator.clitable.print_table') as mock_print:
                 with self.assertRaises(SystemExit):
                     aggregator.aggregate()
-                result = mock_print.call_args[0][0]
-                dates = {r['date'] for r in result}
-                self.assertEqual(len(dates), 2)
+                self.assertEqual(mock_print.call_count, 2)
 
-    def test_result_contains_date_text_and_count_keys(self):
+    def test_result_contains_text_and_count_keys(self):
         reminders = [
             {'id': 'Rm001', 'time': 1587042000, 'recurring': False, 'text': ':tomato:'},
         ]
@@ -144,9 +142,25 @@ class TestAggregate(unittest.TestCase):
                 with self.assertRaises(SystemExit):
                     aggregator.aggregate()
                 result = mock_print.call_args[0][0]
-                self.assertIn('date', result[0])
                 self.assertIn('text', result[0])
                 self.assertIn('count', result[0])
+
+    def test_date_is_printed_as_header_per_group(self):
+        reminders = [
+            {'id': 'Rm001', 'time': 1587042000, 'recurring': False, 'text': ':tomato:'},
+            {'id': 'Rm002', 'time': 1587128400, 'recurring': False, 'text': ':tomato:'},
+        ]
+        expected_dates = {
+            datetime.fromtimestamp(1587042000).strftime('%Y-%m-%d'),
+            datetime.fromtimestamp(1587128400).strftime('%Y-%m-%d'),
+        }
+        with patch('aggregator.do_list_api', return_value={'reminders': reminders}):
+            with patch('aggregator.clitable.print_table'):
+                with patch('builtins.print') as mock_print_builtin:
+                    with self.assertRaises(SystemExit):
+                        aggregator.aggregate()
+                    printed_args = {call.args[0] for call in mock_print_builtin.call_args_list}
+                    self.assertEqual(printed_args & expected_dates, expected_dates)
 
 
 if __name__ == '__main__':

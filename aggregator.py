@@ -51,10 +51,8 @@ def aggregate():
 
                 aggregate_result[dtstr][text] += 1
 
-        result = []
         for date, details in aggregate_result.items():
-            for text, count in details.items():
-                result.append({'date': date, 'text': text, 'count': count})
-
-        clitable.print_table(result)
+            result = [{'text': text, 'count': count} for text, count in details.items()]
+            print(date)
+            clitable.print_table(result)
     sys.exit(0)
