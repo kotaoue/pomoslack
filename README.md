@@ -1,5 +1,6 @@
 # pomoslack
 ![GitHub](https://img.shields.io/github/license/kotaoue/pomoslack)
+[![codecov](https://codecov.io/gh/kotaoue/pomoslack/branch/main/graph/badge.svg)](https://codecov.io/gh/kotaoue/pomoslack)
 ## Overview
 ポモドーロ・テクニックお助け用スクリプト  
 コマンドラインからslackにリマインダを登録したり、  
